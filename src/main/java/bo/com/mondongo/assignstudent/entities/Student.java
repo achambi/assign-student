@@ -17,6 +17,14 @@ public class Student extends EntityBase implements Serializable {
     @Column(name = "last_name", length = 25)
     private String lastName;
 
+    public Student() {
+    }
+
+    public Student(String firstName, String lastName) {
+        this.firstName = firstName;
+        this.lastName = lastName;
+    }
+
     public Integer getId() {
         return id;
     }
