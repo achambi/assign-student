@@ -2,10 +2,11 @@ package bo.com.mondongo.assignstudent.entities;
 
 import javax.persistence.Column;
 import javax.persistence.MappedSuperclass;
+import java.io.Serializable;
 import java.time.LocalDateTime;
 
 @MappedSuperclass
-public class EntityBase {
+public class EntityBase implements Serializable {
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
 
