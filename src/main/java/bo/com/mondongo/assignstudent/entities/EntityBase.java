@@ -39,4 +39,9 @@ public class EntityBase implements Serializable {
     public LocalDateTime getEditedAt() {
         return this.editedAt;
     }
+
+    public void delete() {
+        this.setActive(false);
+        this.setEditedAt(LocalDateTime.now());
+    }
 }

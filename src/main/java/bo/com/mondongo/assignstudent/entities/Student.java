@@ -2,6 +2,7 @@ package bo.com.mondongo.assignstudent.entities;
 
 import javax.persistence.*;
 import java.io.Serializable;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "student")
@@ -17,12 +18,17 @@ public class Student extends EntityBase implements Serializable {
     @Column(name = "last_name", length = 25)
     private String lastName;
 
-    public Student() {
+    public Student(int id, String firstName, String lastName) {
+        this(firstName, lastName);
+        this.id = id;
     }
 
     public Student(String firstName, String lastName) {
         this.firstName = firstName;
         this.lastName = lastName;
+    }
+
+    public Student() {
     }
 
     public Integer getId() {
@@ -47,5 +53,24 @@ public class Student extends EntityBase implements Serializable {
 
     public void setLastName(String lastName) {
         this.lastName = lastName;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj != null) {
+            if (obj instanceof Student) {
+                Student student = (Student) obj;
+                return this.id == student.id &&
+                    this.firstName.equals(student.firstName) &&
+                    this.lastName.equals(student.lastName);
+            }
+        }
+        return false;
+    }
+
+    public void update(Student student) {
+        this.firstName = student.firstName;
+        this.lastName = student.lastName;
+        this.setEditedAt(LocalDateTime.now());
     }
 }
