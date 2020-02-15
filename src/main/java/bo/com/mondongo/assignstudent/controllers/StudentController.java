@@ -39,7 +39,7 @@ public class StudentController {
     }
 
     @ApiOperation(value = "Delete a student", response = ResponseEntity.class)
-    @DeleteMapping(produces = "application/json", consumes = "application/json")
+    @DeleteMapping(produces = "application/json")
     public ResponseEntity delete(@RequestParam("id") int id) {
         return studentService.delete(id);
     }

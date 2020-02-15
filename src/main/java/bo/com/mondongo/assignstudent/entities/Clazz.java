@@ -1,11 +1,14 @@
 package bo.com.mondongo.assignstudent.entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import javax.persistence.*;
 import java.io.Serializable;
 import java.time.LocalDateTime;
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
-@Table(name = "student")
+@Table(name = "class")
 public class Clazz extends EntityBase implements Serializable {
 
     @Id
@@ -21,6 +24,18 @@ public class Clazz extends EntityBase implements Serializable {
 
     @Column(name = "description", length = 25)
     private String description;
+
+    @JsonIgnore
+    @ManyToMany(cascade = {
+        CascadeType.PERSIST,
+        CascadeType.MERGE
+    })
+    @JoinTable(
+        name = "class_student",
+        joinColumns = {@JoinColumn(name = "class_id")},
+        inverseJoinColumns = {@JoinColumn(name = "student_id")}
+    )
+    private Set<Student> students = new HashSet<>();
 
     public Clazz(String code, String title, String description) {
         this.code = code;
@@ -66,6 +81,14 @@ public class Clazz extends EntityBase implements Serializable {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public Set<Student> getStudents() {
+        return students;
+    }
+
+    public void setStudents(Set<Student> students) {
+        this.students = students;
     }
 
     @Override

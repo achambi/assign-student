@@ -1,8 +1,11 @@
 package bo.com.mondongo.assignstudent.entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import javax.persistence.*;
 import java.io.Serializable;
 import java.time.LocalDateTime;
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
 @Table(name = "student")
@@ -17,6 +20,10 @@ public class Student extends EntityBase implements Serializable {
 
     @Column(name = "last_name", length = 25)
     private String lastName;
+
+    @JsonIgnore
+    @ManyToMany(mappedBy = "students")
+    private Set<Clazz> classes = new HashSet<>();
 
     public Student(int id, String firstName, String lastName) {
         this(firstName, lastName);
@@ -72,5 +79,13 @@ public class Student extends EntityBase implements Serializable {
         this.firstName = student.firstName;
         this.lastName = student.lastName;
         this.setEditedAt(LocalDateTime.now());
+    }
+
+    public Set<Clazz> getClasses() {
+        return classes;
+    }
+
+    public void setClasses(Set<Clazz> classes) {
+        this.classes = classes;
     }
 }

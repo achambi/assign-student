@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
+import java.util.Set;
 
 @RestController
 @RequestMapping("/classes")
@@ -22,7 +23,7 @@ public class ClassController {
 
     @ApiOperation(value = "List of classes", response = List.class)
     @RequestMapping(method = RequestMethod.GET, produces = "application/json")
-    public List<Clazz> getAllStudents() {
+    public List<Clazz> getAll() {
         return classService.getAll();
     }
 
@@ -30,6 +31,18 @@ public class ClassController {
     @PostMapping(produces = "application/json", consumes = "application/json")
     public ResponseEntity create(@RequestBody Clazz clazz) {
         return classService.create(clazz);
+    }
+
+    @ApiOperation(value = "Assign a student to a class", response = ResponseEntity.class)
+    @PatchMapping(value = "/{id}/assign/{studentId}", produces = "application/json", consumes = "application/json")
+    public ResponseEntity assign(@PathVariable("id") int id, @PathVariable("studentId") int studentId) {
+        return classService.assign(id, studentId);
+    }
+
+    @ApiOperation(value = "Get all students assigned in a class", response = ResponseEntity.class)
+    @GetMapping(value = "/{id}/students/", produces = "application/json")
+    public Set<Student> assign(@PathVariable("id") int id) {
+        return classService.getStudents(id);
     }
 
     @ApiOperation(value = "Update a class", response = ResponseEntity.class)
@@ -40,7 +53,7 @@ public class ClassController {
     }
 
     @ApiOperation(value = "Delete a class", response = ResponseEntity.class)
-    @DeleteMapping(produces = "application/json", consumes = "application/json")
+    @DeleteMapping(produces = "application/json")
     public ResponseEntity delete(@RequestParam("id") int id) {
         return classService.delete(id);
     }

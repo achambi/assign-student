@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import javax.persistence.EntityNotFoundException;
 import java.util.*;
 
@@ -24,6 +25,7 @@ public class StudentService {
         return studentRepository.findAll();
     }
 
+    @Transactional
     public ResponseEntity create(Student student) {
         student = studentRepository.save(student);
         Map<String, Object> response = new HashMap();
@@ -31,6 +33,7 @@ public class StudentService {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
+    @Transactional
     public ResponseEntity update(Student student) {
 
         Optional<Student> optionalStudent = studentRepository.findById(student.getId());
@@ -45,6 +48,7 @@ public class StudentService {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
+    @Transactional
     public ResponseEntity delete(Integer id) {
         Optional<Student> optionalStudent = studentRepository.findById(id);
 

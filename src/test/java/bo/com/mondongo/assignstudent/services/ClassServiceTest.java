@@ -1,7 +1,9 @@
 package bo.com.mondongo.assignstudent.services;
 
 import bo.com.mondongo.assignstudent.entities.Clazz;
+import bo.com.mondongo.assignstudent.entities.Student;
 import bo.com.mondongo.assignstudent.repositories.ClazzRepository;
+import bo.com.mondongo.assignstudent.repositories.StudentRepository;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -10,12 +12,8 @@ import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import javax.persistence.EntityNotFoundException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import java.util.*;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -23,6 +21,9 @@ public class ClassServiceTest {
 
     @Mock
     private ClazzRepository classRepository;
+
+    @Mock
+    private StudentRepository studentRepository;
 
     @InjectMocks
     private ClassService classService;
@@ -58,6 +59,50 @@ public class ClassServiceTest {
         assertNotNull(result);
         assertEquals(clazz.getId(), result.get("id"));
         verify(classRepository, times(1)).save(eq(clazz));
+
+        verifyNoMoreInteractions(classRepository);
+    }
+
+    @Test
+    public void assign() {
+        Clazz clazz = new Clazz(1, "class-001", "Chemistry", "Chemistry");
+        Student student = new Student(100, "Jose", "Cortez");
+
+        when(classRepository.findById(eq(clazz.getId()))).thenReturn(Optional.of(clazz));
+        when(studentRepository.findById(eq(student.getId()))).thenReturn(Optional.of(student));
+
+        ResponseEntity responseEntity = classService.assign(clazz.getId(), student.getId());
+
+        assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
+        Map result = (Map) (responseEntity.getBody());
+
+        assertNotNull(result);
+        assertEquals(1, clazz.getStudents().size());
+        assertTrue(clazz.getStudents().contains(student));
+
+        verify(classRepository, times(1)).findById(eq(clazz.getId()));
+        verify(studentRepository, times(1)).findById(eq(student.getId()));
+        verify(classRepository, times(1)).save(eq(clazz));
+        verifyNoMoreInteractions(classRepository);
+    }
+
+    @Test
+    public void getStudents() {
+        Clazz clazz = new Clazz(1, "class-001", "Chemistry", "Chemistry");
+        HashSet expected = new HashSet(Arrays.asList(
+            new Student(1, "Daenerys", "Targaryen"),
+            new Student(2, "Robert", "Baratheon"),
+            new Student(3, "Jhon", "Snow")
+        ));
+        clazz.setStudents(expected);
+
+        when(classRepository.findById(eq(clazz.getId()))).thenReturn(Optional.of(clazz));
+
+        Set<Student> result = classService.getStudents(clazz.getId());
+
+        assertNotNull(result);
+        assertEquals(expected, result);
+        verify(classRepository, times(1)).findById(eq(clazz.getId()));
 
         verifyNoMoreInteractions(classRepository);
     }

@@ -1,6 +1,7 @@
 package bo.com.mondongo.assignstudent.controllers;
 
 import bo.com.mondongo.assignstudent.entities.Clazz;
+import bo.com.mondongo.assignstudent.entities.Student;
 import bo.com.mondongo.assignstudent.services.ClassService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.hamcrest.Matchers;
@@ -17,7 +18,9 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import javax.ws.rs.core.MediaType;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
@@ -94,6 +97,42 @@ public class ClassControllerTest {
                                               .contentType(MediaType.APPLICATION_JSON))
                .andExpect(status().isOk());
         Mockito.verify(classService).create(eq(clazz));
+    }
+
+    @Test
+    public void assignStudent() throws Exception {
+        Student student = new Student(1, "Angel", "Chambi");
+        Clazz clazz = new Clazz(1, "class-001", "Math", "Math");
+
+        mockMvc.perform(MockMvcRequestBuilders.patch("/classes/{id}/assign/{studentId}",
+                                                     String.valueOf(clazz.getId()), String.valueOf(student.getId())
+        ).content(objectMapper.writeValueAsBytes(student)).contentType(MediaType.APPLICATION_JSON))
+               .andExpect(status().isOk());
+        Mockito.verify(classService).assign(eq(clazz.getId()), eq(student.getId()));
+    }
+
+    @Test
+    public void getClasses() throws Exception {
+        Student student = new Student(1, "Angel", "Chambi");
+        Clazz clazz = new Clazz(1, "class-001", "Math", "Math");
+        Set<Student> students = new HashSet(Arrays.asList(
+            new Student(1, "Daenerys", "Targaryen"),
+            new Student(2, "Robert", "Baratheon"),
+            new Student(3, "Jhon", "Snow")
+        ));
+
+        clazz.setStudents(students);
+
+        when(classService.getStudents(clazz.getId())).thenReturn(clazz.getStudents());
+
+        mockMvc.perform(MockMvcRequestBuilders.get("/classes/{id}/students/", String.valueOf(clazz.getId()))
+                                              .content(objectMapper.writeValueAsBytes(student))
+                                              .contentType(MediaType.APPLICATION_JSON))
+               .andExpect(MockMvcResultMatchers.status().isOk())
+               .andExpect(MockMvcResultMatchers.content().contentType(APPLICATION_JSON))
+               .andExpect(MockMvcResultMatchers.jsonPath("$", Matchers.hasSize(3)));
+
+        Mockito.verify(classService).getStudents(eq(clazz.getId()));
     }
 
     @Test
