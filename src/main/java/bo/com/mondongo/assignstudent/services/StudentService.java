@@ -1,11 +1,10 @@
 package bo.com.mondongo.assignstudent.services;
 
+import bo.com.mondongo.assignstudent.dto.ResponseDto;
 import bo.com.mondongo.assignstudent.entities.Student;
 import bo.com.mondongo.assignstudent.repositories.StudentRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import javax.persistence.EntityNotFoundException;
@@ -26,39 +25,33 @@ public class StudentService {
     }
 
     @Transactional
-    public ResponseEntity create(Student student) {
+    public ResponseDto create(Student student) {
         student = studentRepository.save(student);
-        Map<String, Object> response = new HashMap();
-        response.put("id", student.getId());
-        return new ResponseEntity<>(response, HttpStatus.OK);
+        return new ResponseDto(Boolean.TRUE, String.format("Student created, id: %d", student.getId()));
     }
 
     @Transactional
-    public ResponseEntity update(Student student) {
+    public ResponseDto update(Student student) {
 
         Optional<Student> optionalStudent = studentRepository.findById(student.getId());
 
         Student currentStudent = optionalStudent.orElseThrow(
-            () -> new EntityNotFoundException("student id " + student.getId() + " not found in the system"));
+            () -> new EntityNotFoundException(String.format("student id %d not found in the system", student.getId())));
 
         currentStudent.update(student);
-        studentRepository.save(currentStudent);
-        Map<String, Object> response = new HashMap();
-        response.put("id", student.getId());
-        return new ResponseEntity<>(response, HttpStatus.OK);
+        currentStudent = studentRepository.save(currentStudent);
+        return new ResponseDto(Boolean.FALSE, String.format("Student updated, id: %d", currentStudent.getId()));
     }
 
     @Transactional
-    public ResponseEntity delete(Integer id) {
+    public ResponseDto delete(Integer id) {
         Optional<Student> optionalStudent = studentRepository.findById(id);
 
         Student currentStudent = optionalStudent.orElseThrow(
-            () -> new EntityNotFoundException("student id " + id + " not found in the system"));
+            () -> new EntityNotFoundException(String.format("student id %d not found in the system", id)));
         currentStudent.delete();
         studentRepository.save(currentStudent);
-        Map<String, Object> response = new HashMap();
-        response.put("id", id);
-        return new ResponseEntity<>(response, HttpStatus.OK);
+        return new ResponseDto(Boolean.FALSE, "Student deleted!");
     }
 }
 

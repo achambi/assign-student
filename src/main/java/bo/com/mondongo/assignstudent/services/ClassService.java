@@ -1,13 +1,12 @@
 package bo.com.mondongo.assignstudent.services;
 
+import bo.com.mondongo.assignstudent.dto.ResponseDto;
 import bo.com.mondongo.assignstudent.entities.Clazz;
 import bo.com.mondongo.assignstudent.entities.Student;
 import bo.com.mondongo.assignstudent.repositories.ClazzRepository;
 import bo.com.mondongo.assignstudent.repositories.StudentRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import javax.persistence.EntityNotFoundException;
@@ -31,62 +30,56 @@ public class ClassService {
     }
 
     @Transactional
-    public ResponseEntity create(Clazz clazz) {
+    public ResponseDto create(Clazz clazz) {
         clazz = clazzRepository.save(clazz);
-        Map<String, Object> response = new HashMap();
-        response.put("id", clazz.getId());
-        return new ResponseEntity<>(response, HttpStatus.OK);
+        return new ResponseDto(Boolean.FALSE, String.format("Class created, id: %d", clazz.getId()));
     }
 
     @Transactional
-    public ResponseEntity update(Clazz clazz) {
+    public ResponseDto update(Clazz clazz) {
         Optional<Clazz> optionalClazz = clazzRepository.findById(clazz.getId());
 
         Clazz currentClazz = optionalClazz.orElseThrow(
-            () -> new EntityNotFoundException("class id " + clazz.getId() + " not found in the system"));
+            () -> new EntityNotFoundException(String.format("Class id %d not found in the system", clazz.getId())));
 
         currentClazz.update(clazz);
         clazzRepository.save(currentClazz);
-        Map<String, Object> response = new HashMap();
-        response.put("id", clazz.getId());
-        return new ResponseEntity<>(response, HttpStatus.OK);
+        return new ResponseDto(Boolean.FALSE, String.format("Class updated, id: %d", clazz.getId()));
     }
 
     @Transactional
-    public ResponseEntity delete(Integer id) {
+    public ResponseDto delete(Integer id) {
         Optional<Clazz> optionalClazz = clazzRepository.findById(id);
 
         Clazz currentClazz = optionalClazz.orElseThrow(
-            () -> new EntityNotFoundException("class id " + id + " not found in the system"));
+            () -> new EntityNotFoundException(String.format("Class id %d not found in the system", id)));
         currentClazz.delete();
         clazzRepository.save(currentClazz);
-        Map<String, Object> response = new HashMap();
-        response.put("id", id);
-        return new ResponseEntity<>(response, HttpStatus.OK);
+
+        return new ResponseDto(Boolean.FALSE, "Student deleted!");
     }
 
     @Transactional
-    public ResponseEntity assign(int classId, int studentId) {
+    public ResponseDto assign(int classId, int studentId) {
 
         Optional<Clazz> optionalClazz = clazzRepository.findById(classId);
         Optional<Student> optionalStudent = studentRepository.findById(studentId);
         Clazz currentClazz = optionalClazz.orElseThrow(
-            () -> new EntityNotFoundException("class id " + classId + " not found in the system"));
+            () -> new EntityNotFoundException("Class id " + classId + " not found in the system"));
         Student student = optionalStudent.orElseThrow(
-            () -> new EntityNotFoundException("student id " + studentId + " not found in the system"));
+            () -> new EntityNotFoundException("Student id " + studentId + " not found in the system"));
 
         currentClazz.getStudents().add(student);
         clazzRepository.save(currentClazz);
 
-        Map<String, Object> response = new HashMap();
-        return new ResponseEntity<>(response, HttpStatus.OK);
+        return new ResponseDto(Boolean.FALSE, String.format("Student %d assigned to class %d", studentId, classId));
     }
 
     public Set<Student> getStudents(Integer id) {
         Optional<Clazz> optionalClazz = clazzRepository.findById(id);
 
         Clazz currentClazz = optionalClazz.orElseThrow(
-            () -> new EntityNotFoundException("class id " + id + " not found in the system"));
+            () -> new EntityNotFoundException("Class id " + id + " not found in the system"));
         return currentClazz.getStudents();
     }
 }

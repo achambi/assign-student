@@ -1,5 +1,6 @@
 package bo.com.mondongo.assignstudent.services;
 
+import bo.com.mondongo.assignstudent.dto.ResponseDto;
 import bo.com.mondongo.assignstudent.entities.Student;
 import bo.com.mondongo.assignstudent.repositories.StudentRepository;
 import org.junit.Test;
@@ -14,8 +15,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -51,12 +51,10 @@ public class StudentServiceTest {
         Student student = new Student("Jose", "Cortez");
         student.setId(1);
         when(studentRepository.save(eq(student))).thenReturn(student);
-        ResponseEntity responseEntity = studentService.create(student);
+        ResponseDto response = studentService.create(student);
 
-        assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
-        Map result = (Map) (responseEntity.getBody());
-        assertNotNull(result);
-        assertEquals(student.getId(), result.get("id"));
+        assertEquals(Boolean.TRUE, response.isError());
+        assertEquals("Student created, id: 1", response.getMessage());
         verify(studentRepository, times(1)).save(eq(student));
 
         verifyNoMoreInteractions(studentRepository);
@@ -68,12 +66,10 @@ public class StudentServiceTest {
 
         when(studentRepository.findById(eq(student.getId()))).thenReturn(java.util.Optional.of(student));
         when(studentRepository.save(eq(student))).thenReturn(student);
-        ResponseEntity responseEntity = studentService.update(student);
+        ResponseDto response = studentService.update(student);
 
-        assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
-        Map result = (Map) (responseEntity.getBody());
-        assertNotNull(result);
-        assertEquals(student.getId(), result.get("id"));
+        assertEquals(Boolean.FALSE, response.isError());
+        assertEquals("Student updated, id: 1", response.getMessage());
 
         verify(studentRepository, times(1)).save(eq(student));
         verify(studentRepository, times(1)).findById(eq(student.getId()));
@@ -93,8 +89,11 @@ public class StudentServiceTest {
 
         when(studentRepository.findById(eq(student.getId()))).thenReturn(java.util.Optional.of(student));
 
-        studentService.delete(student.getId());
-        assertEquals(false, student.getActive());
+        ResponseDto response = studentService.delete(student.getId());
+
+        assertFalse(student.getActive());
+        assertFalse(response.isError());
+        assertEquals("Student deleted!", response.getMessage());
 
         verify(studentRepository, times(1)).save(eq(student));
         verify(studentRepository, times(1)).findById(eq(student.getId()));
